@@ -8,8 +8,8 @@ const express = require('express');
 // Axios makes HTTP requests to external APIs
 const axios = require('axios');
 
-// Google's Gemini AI library
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+// Claude AI SDK
+const Anthropic = require('@anthropic-ai/sdk');
 
 // CORS allows frontend and backend to communicate
 const cors = require('cors');
@@ -40,11 +40,13 @@ app.use(express.json());
 app.use(express.static('public'));
 
 // ==========================================
-// STEP 4: Initialize Gemini AI
+// STEP 4: Initialize Claude AI
 // ==========================================
 
 // Create AI instance with your API key from .env
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const anthropic = new Anthropic({
+  apiKey: process.env.CLAUDE_API_KEY
+});
 
 // ==========================================
 // STEP 5: Create API Routes
@@ -90,41 +92,54 @@ app.get('/api/bill/:congress/:billType/:billNumber', async (req, res) => {
 // ROUTE 3: Get AI interpretation of a bill
 // Frontend sends POST request with bill text
 app.post('/api/interpret', async (req, res) => {
+  console.log('Received bill for interpretation');
   try {
     // Get bill information from request body
     const { billText, billTitle } = req.body;
     
-    // Select Gemini model to use
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash" 
-    });
+    console.log('Sending to Claude...');
     
-    // Create a detailed prompt for the AI
-    const prompt = `You are a helpful assistant that explains federal legislation in simple terms. 
-    
+    const message = await anthropic.messages.create({
+      model: "claude-sonnet-4-6",
+      max_tokens: 1024,
+      messages: [{
+        role: "user",
+        content: `You are an expert policy analyst who explains federal legislation with transparency, objectivity, and ethical clarity. Your goal is to help citizens understand what bills actually do without political bias.
+
 Bill Title: ${billTitle}
 
 Bill Text: ${billText}
 
-Please provide:
-1. A brief summary (2-3 sentences)
-2. Who this bill affects
-3. Key provisions (main points)
-4. Potential impact
+Please provide an ethical, transparent analysis:
 
-Keep the explanation accessible to the general public. Use simple language.`;
+1. **Plain Language Summary** (2-3 sentences explaining what this bill does in simple terms)
 
-    // Send prompt to Gemini and wait for response
-    const result = await model.generateContent(prompt);
-    const interpretation = result.response.text();
+2. **Who This Affects** (specific groups of people, industries, or communities impacted)
+
+3. **Key Provisions** (the main things this bill would change or create)
+
+4. **Potential Impacts** (both intended benefits and possible concerns, presented objectively)
+
+5. **Transparency Note** (any important context citizens should know, such as who sponsored it, if it's bipartisan, or if there are competing perspectives)
+
+Be clear, accurate, and balanced. Help citizens make informed decisions.`
+      }]
+    });
+
+    // Send prompt to Claude and wait for response
+    const interpretation = message.content[0].text;
+    
+    console.log('✅ Got response from Claude');
+    
     
     // Send AI's interpretation back to frontend
     res.json({ interpretation });
+
   } catch (error) {
-    console.error('Error interpreting bill:', error.message);
+    console.error('❌ Error interpreting bill:', error.message);
     res.status(500).json({ 
       error: 'Failed to interpret bill. Please try again.',
-      details: error.message
+      details: error.message 
     });
   }
 });
@@ -136,5 +151,5 @@ Keep the explanation accessible to the general public. Use simple language.`;
 app.listen(PORT, () => {
   console.log(`✅ Server is running on http://localhost:${PORT}`);
   console.log(`📡 API endpoints ready`);
-  console.log(`🤖 Gemini AI connected`);
+  console.log(`🤖 Claude AI connected`);
 });
