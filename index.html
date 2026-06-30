@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legislation AI</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>📜 Legislation AI</h1>
+        <p>Track and understand federal legislation with transparent AI assistance</p>
+    </header>
+
+    <main>
+
+        <div class="search-container">
+            <!-- Using type="search" provides native semantic clarity -->
+            <input type="search" id="search-input" placeholder="Type to search bills...">
+            <ul id="results-list" class="results-list"></ul>
+        </div>
+
+        <!-- SECTION 1: Bills List View (shown by default) -->
+        <section id="bills-section">
+            <h2>Recent Federal Bills</h2>
+            <button id="refresh-btn">🔄 Refresh Bills</button>
+            <div id="bills-list" class="bills-container">
+                <p>Loading bills...</p>
+            </div>
+        </section>
+
+        <!-- SECTION 2: Bill Detail View (hidden by default) -->
+        <section id="detail-section" style="display: none;">
+            <button id="back-btn">← Back to List</button>
+            <div id="bill-detail"></div>
+            <button id="interpret-btn" class="primary-btn">🤖 Ask AI</button>
+            <div id="ai-interpretation"></div>
+        </section>
+
+        <!-- SECTION 3: Chat Section (hidden by default) -->
+        <section id="chat-section" style="display: none;">
+            <h3>💬 Ask Follow-up Questions</h3>
+
+            <!-- Chat messages display area -->
+            <div id="chat-messages" class="chat-messages">
+                <!-- Messages will appear here -->
+            </div>
+
+            <!-- Chat input area -->
+            <div class="chat-input-container">
+                <input
+                    type="text"
+                    id="chat-input"
+                    placeholder="Ask a question about this bill..."
+                    autocomplete="off"
+                >
+                <button id="send-btn">Send</button>
+            </div>
+        </section>
+
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
